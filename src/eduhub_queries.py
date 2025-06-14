@@ -31,16 +31,6 @@ class EdHubDB:
         self.submissions_col = self.db["submissions"]
 
     # Part 1
-    def load_schemas(self):
-        """Load validation schemas from JSON file"""
-        try:
-            with open(self.schemas_path, "r") as f:
-                schemas = json.load(f)
-            return schemas
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Schema file not found: {self.schemas_path}")
-        except json.JSONDecodeError:
-            raise ValueError(f"Invalid JSON in schema file: {self.schemas_path}")
 
     def build_collection(self):
         """Setup collections and validations from JSON files"""
@@ -421,6 +411,7 @@ class EdHubDB:
             print(f"Error grouping courses by category: {e}")
             return []
 
+    # here
     def average_grade_per_student(self):
         """Aggregation: Average grade per student"""
         try:
@@ -740,3 +731,32 @@ class EdHubDB:
         except Exception as e:
             print(f"Error calculating student engagement metrics: {e}")
             return []
+
+    def setup_index(self):
+        """Create indexes for efficient queries"""
+        try:
+            # User email lookup (unique)
+            self.users_col.create_index("email", unique=True)
+            # Course search by title (text) and category
+            self.courses_col.create_index([("title", "text")])
+            self.courses_col.create_index("category")
+            # Assignment queries by due date
+            self.assignments_col.create_index("dueDate")
+            # Enrollment queries by student and course
+            self.enrollments_col.create_index("studentId")
+            self.enrollments_col.create_index("courseId")
+            print("Indexes created successfully.")
+        except Exception as e:
+            print(f"Error setting up indexes: {e}")
+
+    # Part 6
+    def load_schemas(self):
+        """Load validation schemas from JSON file"""
+        try:
+            with open(self.schemas_path, "r") as f:
+                schemas = json.load(f)
+            return schemas
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Schema file not found: {self.schemas_path}")
+        except json.JSONDecodeError:
+            raise ValueError(f"Invalid JSON in schema file: {self.schemas_path}")
