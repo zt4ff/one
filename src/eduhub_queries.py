@@ -543,9 +543,25 @@ class EdHubDB:
                     }
                 },
                 {
+                    "$lookup": {
+                        "from": "users",
+                        "localField": "_id",
+                        "foreignField": "userId",
+                        "as": "instructor",
+                    }
+                },
+                {"$unwind": "$instructor"},
+                {
                     "$project": {
                         "_id": 0,
                         "instructorId": "$_id",
+                        "instructorName": {
+                            "$concat": [
+                                "$instructor.firstName",
+                                " ",
+                                "$instructor.lastName",
+                            ]
+                        },
                         "totalStudents": {"$size": "$students"},
                         "coursesTaught": 1,
                     }
